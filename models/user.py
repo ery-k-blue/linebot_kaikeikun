@@ -17,8 +17,8 @@ class User(Base):
     group: 所属しているグループ
     """
     __tablename__ = 'user'
-    id = Column('id', INTEGER(unsigned=True), primary_key=True, autoincrement=True)
-    username = Column('username', String(256))
-    line_user_id = Column('password', String(256))
+    id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    username = Column(String(256))
+    line_user_id = Column(String(256))
 
     group = relationship("Group", secondary=user_group, back_populates="user")
