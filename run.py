@@ -1,10 +1,13 @@
 from aiolinebot import AioLineBotApi
 from fastapi import BackgroundTasks, FastAPI, Request
 
+import setting_env
 from hundler import mentioned_message_hundler, message_hundler
 from linebot import WebhookParser
 
-
+# APIクライアントとパーサーをインスタンス化
+line_api = AioLineBotApi(channel_access_token=setting_env.CHANNEL_ACCESS_TOKEN)
+parser = WebhookParser(channel_secret=setting_env.CHANNEL_SECRET)
 
 app = FastAPI()
 
