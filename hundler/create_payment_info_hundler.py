@@ -1,4 +1,5 @@
 import db
+from linebot import exceptions
 from linebot.models import TextSendMessage
 from models import Group, PaymentInfo, User
 
@@ -6,8 +7,10 @@ from .utils import confirm_input
 
 
 async def create_payment_info_hundler(line_api, event):
-    # 入力から「円」or「えん」を取り除く
     text = event.message.text
+    line_user_id = event.source.user_id
+    line_group_id = event.source.group_id
+    # 入力から「円」or「えん」を取り除く
     if "円" in text:
         text = text.rstrip("円")
     elif "えん" in text:
@@ -21,15 +24,13 @@ async def create_payment_info_hundler(line_api, event):
         return []
 
     # userを取得（作成されていなかったら作成）
-    line_user_id = event.source.user_id
-    profile = line_api.get_profile(line_user_id)
+    profile = line_api.get_group_member_profile(line_group_id, line_user_id)
     pay_username = profile.display_name
     user = User.get_or_create(line_user_id, pay_username)
 
     # groupを取得（作成されていなかったら作成）
-    line_group_id = event.source.group_id
     group = Group.get_or_create(line_group_id)
-    group.user = [user]
+    group.user += [user]
 
     # groupにuserを紐づける（重複は自動でスルーしてくれる）
     db.session.add(group)
