@@ -1,8 +1,8 @@
-from tokenize import group
-from fastapi import FastAPI, Request, BackgroundTasks
-from linebot import WebhookParser
-from linebot.models import TextMessage
 from aiolinebot import AioLineBotApi
+from fastapi import BackgroundTasks, FastAPI, Request
+
+from hundler import mentioned_message_hundler, message_hundler
+from linebot import WebhookParser
 
 
 # APIクライアントとパーサーをインスタンス化
@@ -19,18 +19,21 @@ async def handle_request(request: Request, background_tasks: BackgroundTasks):
     return "ok"
 
 async def handle_events(events):
-    group_id = "C029695106bd4f5ec16b8b2aae20d8292"
-    member_ids_res = line_api.get_group_member_ids(group_id)
-
-    print(member_ids_res.member_ids)
-    print(member_ids_res.next)
-
-
     for ev in events:
-        print(ev)
-        try:
-            await line_api.reply_message_async(
-                ev.reply_token,
-                TextMessage(text=f"You said: {ev.message.text}"))
-        except Exception:
+        print(ev.type)
+        if ev.type == "join":
             pass
+        if ev.type == "leave":
+            pass
+        if ev.type == "memberJoined":
+            pass
+        if ev.type == "memberLeft":
+            pass
+        if ev.type == "message":
+            if ev.message.mention:
+                await mentioned_message_hundler(line_api, ev)
+            else:
+                await message_hundler(line_api, ev)
+
+
+        # await line_api.reply_message_async(ev.reply_token, TextMessage(text=f"You said: {ev.message.text}"))
