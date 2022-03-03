@@ -2,7 +2,7 @@ from aiolinebot import AioLineBotApi
 from fastapi import BackgroundTasks, FastAPI, Request
 
 import setting_env
-from hundler import mentioned_message_hundler, message_hundler
+from hundler import mentioned_message_hundler, kaikei_hundler, create_payment_info_hundler
 from linebot import WebhookParser
 
 # APIクライアントとパーサーをインスタンス化
@@ -33,7 +33,10 @@ async def handle_events(events):
             if ev.message.mention:
                 await mentioned_message_hundler(line_api, ev)
             else:
-                await message_hundler(line_api, ev)
+                if "会計君" in ev.message.text:
+                    await kaikei_hundler(line_api, ev)
+                else:
+                    await create_payment_info_hundler(line_api, ev)
 
 
         # await line_api.reply_message_async(ev.reply_token, TextMessage(text=f"You said: {ev.message.text}"))
