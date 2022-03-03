@@ -1,4 +1,4 @@
-from db import Base
+import db
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import relationship
@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from .user_group import user_group
 
 
-class Group(Base):
+class Group(db.Base):
     """
     Groupテーブル
 
@@ -19,3 +19,13 @@ class Group(Base):
     line_group_id = Column(String(256))
 
     user = relationship("User", secondary=user_group, back_populates="group")
+
+    def get_or_create(line_group_id):
+        group = db.session.query(Group).filter(Group.line_group_id==line_group_id).first()
+        if not group:
+            group = Group(line_group_id=line_group_id)
+            db.session.add(group)
+            # HACK: なぜかグループが作成された時のidがとれない
+            db.session.commit()
+
+        return group
