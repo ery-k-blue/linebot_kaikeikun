@@ -5,9 +5,6 @@ from hundler import mentioned_message_hundler, message_hundler
 from linebot import WebhookParser
 
 
-# APIクライアントとパーサーをインスタンス化
-line_api = AioLineBotApi(channel_access_token="fiB0OtMSnuig6C16lTCLOTOGa6E9FsALfDtN5vgQ2nb7+ok5TMLTu5kmThngNoryoIoPvHbH1dgzKL5LMLtcuD+lXdCPOGswQA1IsK3a2JVO3Jqp4OYTdqABBPyBmHgDK/m4xTxPZRBABNwMvcrG+gdB04t89/1O/w1cDnyilFU=")
-parser = WebhookParser(channel_secret="7c1699bff03feb2bc7b06750304eea92")
 
 app = FastAPI()
 
