@@ -19,6 +19,3 @@ class PaymentInfo(Base):
     payment = Column(INTEGER(unsigned=True))
     user_id = Column(Integer, ForeignKey("user.id"))
     group_id = Column(Integer, ForeignKey("group.id"))
-
-    user = relationship("User", back_populates="payment_info")
-    group = relationship("Group", back_populates="payment_info")
