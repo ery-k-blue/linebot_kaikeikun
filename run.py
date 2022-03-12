@@ -1,9 +1,12 @@
 from aiolinebot import AioLineBotApi
 from fastapi import BackgroundTasks, FastAPI, Request
+from linebot import WebhookParser
+from linebot.models import TextSendMessage
 
 import setting_env
-from hundler import mentioned_message_hundler, kaikei_hundler, create_payment_info_hundler
-from linebot import WebhookParser
+from hundler import message_hundler, postback_hundler
+from models.group import Group
+from models.user import User
 
 # APIクライアントとパーサーをインスタンス化
 line_api = AioLineBotApi(channel_access_token=setting_env.CHANNEL_ACCESS_TOKEN)
@@ -18,25 +21,117 @@ async def handle_request(request: Request, background_tasks: BackgroundTasks):
 
     return "ok"
 
+
 async def handle_events(events):
     for ev in events:
         print(ev.type)
-        if ev.type == "join":
-            pass
-        if ev.type == "leave":
-            pass
-        if ev.type == "memberJoined":
-            pass
-        if ev.type == "memberLeft":
-            pass
-        if ev.type == "message":
-            if ev.message.mention:
-                await mentioned_message_hundler(line_api, ev)
-            else:
-                if "会計君" in ev.message.text:
-                    await kaikei_hundler(line_api, ev)
+        print(ev)
+
+        # eventの情報を取得
+        text, postback_data, speaker_line_user_id, line_group_id, mentionees_line_user_info = _get_event_info(ev)  
+
+        print("text:{}".format(text))
+        print("postback_data:{}".format(postback_data))
+        print("speaker_line_user_id:{}".format(speaker_line_user_id))
+        print("line_group_id:{}".format(line_group_id))
+        print("mentionees_line_user_info:{}".format(mentionees_line_user_info))
+
+        # 入力が「数字のみ」or「メンション＋数字のみ」or「会計君が含まれている」以外の場合、何もしない
+        if not _judg_through_event(ev.type, text, postback_data):
+            print("___pass")
+            return []
+
+        # --- ユーザー・グループを登録 ---
+        group = Group.get_or_create(line_group_id)
+        profile = line_api.get_group_member_profile(line_group_id, speaker_line_user_id)
+        speaker_line_user = User.get_or_create(speaker_line_user_id, profile.display_name, line_group_id)
+        for user_info in mentionees_line_user_info:
+            mentionee_line_user = User.get_or_create(user_info["line_user_id"], user_info["username"], line_group_id)
+
+        # --- 各hundlerへの振り分け ---
+        if group.is_accounting:
+            if ev.type == "message":
+                # メンションのみのメッセージ
+                if mentionees_line_user_info and text == "":
+                    # message_hundler.selected_warikan_member()
+                    pass
                 else:
-                    await create_payment_info_hundler(line_api, ev)
+                    await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"会計の最中です。\n会計を行うメンバーをメンションで選択してください。「会計を中断」ボタンを押すことで、会計を中断することができます。"))
+            elif ev.type == "postback":
+                if "cancel_accounting" in postback_data:
+                    # postback_hundler.canceled_accounting()
+                    pass
+                else:
+                    await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"会計の最中です。\n会計を行うメンバーをメンションで選択してください。「会計を中断」ボタンを押すことで、会計を中断することができます。"))
+
+        else:
+            if ev.type == "message":
+                # 数字のみのメッセージ
+                if text.isdigit():
+                    if len(mentionees_line_user_info) == 0:
+                        await message_hundler.input_payment_info(line_api, ev.reply_token, speaker_line_user, group, text)
+                        print("数字のみのメッセージ")
+                    elif len(mentionees_line_user_info) == 1:
+                        await message_hundler.input_payment_info(line_api, ev.reply_token, mentionee_line_user, group, text)
+                        print("メンション＋数字のみのメッセージ")
+                    elif len(mentionees_line_user_info) >= 2:
+                        print("複数メンション＋数字のみのメッセージ")
+                        await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"金額を支払った人は1人しか選択できません。"))
+
+                if "会計君" in text:
+                    await message_hundler.send_menu(line_api, ev.reply_token)
+                    print("会計君込みのメッセージ")
+
+            elif ev.type == "postback":
+                if "cancel_accounting" in postback_data:
+                    await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"現在、会計中ではありません。"))
+                if "delete_payment_info" in postback_data:
+                    await postback_hundler.delete_payment_info(line_api, ev.reply_token, postback_data, speaker_line_user)
+                    pass
+                if "start_accounting" in postback_data:
+                    # postback_hundler.start_accounting()
+                    pass
+                if "send_help_message" in postback_data:
+                    # postbavk_hundler.send_help_message()
+                    pass
 
 
-        # await line_api.reply_message_async(ev.reply_token, TextMessage(text=f"You said: {ev.message.text}"))
+def _get_event_info(ev):
+    line_user_id = getattr(ev.source, "user_id", None)
+    line_group_id = getattr(ev.source, "group_id", None)
+
+    text = ""
+    postback_data = None
+    mention = None
+    if ev.type == "message":
+        text = getattr(ev.message, "text", "")
+        mention = getattr(ev.message, "mention", None)
+    elif ev.type == "postback":
+        postback_data = ev.postback.data
+
+    mentionees_line_user_info = []
+    if mention:
+        mentionees = mention.mentionees
+        
+        for mentionee in mentionees:
+            mentionee_line_user_id = mentionee.user_id
+            profile = line_api.get_group_member_profile(line_group_id, mentionee_line_user_id)
+            mentionee_username = profile.display_name
+            mentionee_info = {"line_user_id": mentionee_line_user_id, "username": mentionee_username}
+            mentionees_line_user_info.append(mentionee_info)
+
+            # メンションをテキストから取り除く　例）「@tanaka 900」→「900」
+            text = text.replace("@" + mentionee_username + " ", "")
+    
+    return text, postback_data, line_user_id, line_group_id, mentionees_line_user_info
+
+
+def _judg_through_event(event_type, text, postback_data):
+    if event_type == "message" or event_type == "postback":
+        if "会計君" in text:
+            return True
+        if text.isdigit():
+            return True
+        if postback_data:
+            return True
+    return False

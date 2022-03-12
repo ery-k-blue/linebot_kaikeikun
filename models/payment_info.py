@@ -1,5 +1,5 @@
 from db import Base
-from sqlalchemy import Column, ForeignKey, Integer, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.dialects.mysql import INTEGER
 
 
@@ -17,5 +17,6 @@ class PaymentInfo(Base):
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     payment = Column(INTEGER(unsigned=True))
     is_settled = Column(Boolean, default=False)
+    is_deleted = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey("user.id"))
     group_id = Column(Integer, ForeignKey("group.id"))

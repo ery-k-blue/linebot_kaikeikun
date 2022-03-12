@@ -1,5 +1,5 @@
 import db
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import relationship
 
@@ -17,6 +17,8 @@ class Group(db.Base):
     __tablename__ = 'group'
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     line_group_id = Column(String(256))
+    # True: 会計処理中  False: 通常時
+    is_accounting = Column(Boolean, default=False)
 
     user = relationship("User", secondary=user_group, back_populates="group")
 
@@ -25,7 +27,7 @@ class Group(db.Base):
         if not group:
             group = Group(line_group_id=line_group_id)
             db.session.add(group)
-            # HACK: なぜかグループが作成された時のidがとれない
             db.session.commit()
+            print('_____create_group_____')
 
         return group

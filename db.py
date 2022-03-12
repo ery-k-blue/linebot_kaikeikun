@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 import setting_env
 
 Base = declarative_base()
-engine = create_engine(setting_env.RDB_PATH, echo=True)
+engine = create_engine(setting_env.RDB_PATH, echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()
