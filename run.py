@@ -5,6 +5,7 @@ from linebot.models import TextSendMessage
 
 import setting_env
 from hundler import message_hundler, postback_hundler
+from message_template import cancel_accounting_message, kaikeikun_menu_message
 from models.group import Group
 from models.user import User
 
@@ -37,7 +38,7 @@ async def handle_events(events):
         print("mentionees_line_user_info:{}".format(mentionees_line_user_info))
 
         # 入力が「数字のみ」or「メンション＋数字のみ」or「会計君が含まれている」以外の場合、何もしない
-        if not _judg_through_event(ev.type, text, postback_data):
+        if not _judg_through_event(ev.type, text, postback_data, mentionees_line_user_info):
             print("___pass")
             return []
 
@@ -45,24 +46,26 @@ async def handle_events(events):
         group = Group.get_or_create(line_group_id)
         profile = line_api.get_group_member_profile(line_group_id, speaker_line_user_id)
         speaker_line_user = User.get_or_create(speaker_line_user_id, profile.display_name, line_group_id)
+        mentionee_line_user_list = []
         for user_info in mentionees_line_user_info:
             mentionee_line_user = User.get_or_create(user_info["line_user_id"], user_info["username"], line_group_id)
+            mentionee_line_user_list.append(mentionee_line_user)
+
 
         # --- 各hundlerへの振り分け ---
         if group.is_accounting:
             if ev.type == "message":
                 # メンションのみのメッセージ
                 if mentionees_line_user_info and text == "":
-                    # message_hundler.selected_warikan_member()
-                    pass
+                    await message_hundler.selected_warikan_member(line_api, ev.reply_token, group, speaker_line_user, mentionee_line_user_list)
                 else:
-                    await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"会計の最中です。\n会計を行うメンバーをメンションで選択してください。「会計を中断」ボタンを押すことで、会計を中断することができます。"))
+                    await line_api.reply_message_async(ev.reply_token, cancel_accounting_message(group))
             elif ev.type == "postback":
                 if "cancel_accounting" in postback_data:
-                    # postback_hundler.canceled_accounting()
+                    await postback_hundler.canceled_accounting(line_api, ev.reply_token, group)
                     pass
                 else:
-                    await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"会計の最中です。\n会計を行うメンバーをメンションで選択してください。「会計を中断」ボタンを押すことで、会計を中断することができます。"))
+                    await line_api.reply_message_async(ev.reply_token, cancel_accounting_message(group))
 
         else:
             if ev.type == "message":
@@ -79,22 +82,21 @@ async def handle_events(events):
                         await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"金額を支払った人は1人しか選択できません。"))
 
                 if "会計君" in text:
-                    await message_hundler.send_menu(line_api, ev.reply_token)
+                    await line_api.reply_message_async(ev.reply_token, kaikeikun_menu_message())
                     print("会計君込みのメッセージ")
 
             elif ev.type == "postback":
                 if "cancel_accounting" in postback_data:
                     await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"現在、会計中ではありません。"))
+
                 if "delete_payment_info" in postback_data:
                     await postback_hundler.delete_payment_info(line_api, ev.reply_token, postback_data, speaker_line_user)
-                    pass
-                if "start_accounting" in postback_data:
-                    # postback_hundler.start_accounting()
-                    pass
-                if "send_help_message" in postback_data:
-                    # postbavk_hundler.send_help_message()
-                    pass
 
+                if "start_accounting" in postback_data:
+                    await postback_hundler.start_accounting(line_api, ev.reply_token, group)
+
+                if "send_help_message" in postback_data:
+                    pass
 
 def _get_event_info(ev):
     line_user_id = getattr(ev.source, "user_id", None)
@@ -126,7 +128,7 @@ def _get_event_info(ev):
     return text, postback_data, line_user_id, line_group_id, mentionees_line_user_info
 
 
-def _judg_through_event(event_type, text, postback_data):
+def _judg_through_event(event_type, text, postback_data, mentionees_line_user_info):
     if event_type == "message" or event_type == "postback":
         if "会計君" in text:
             return True
@@ -134,4 +136,7 @@ def _judg_through_event(event_type, text, postback_data):
             return True
         if postback_data:
             return True
+        if mentionees_line_user_info:
+            if text.isdigit() or text == "":
+                return True
     return False

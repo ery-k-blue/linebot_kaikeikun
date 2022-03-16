@@ -1,5 +1,7 @@
+from datetime import datetime
+
 import db
-from sqlalchemy import Column, String
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import relationship
 
@@ -12,14 +14,18 @@ class User(db.Base):
     """
     Userテーブル
 
-    id       : 主キー
-    username : ユーザネーム
-    line_user_d   : ユーザーID
+    id           : 主キー
+    created_at   : レコード作成時刻
+    update_at    : レコード更新時刻
+    username     : ユーザネーム
+    line_user_id : ユーザーID
 
     group: 所属しているグループ
     """
     __tablename__ = 'user'
     id = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    created_at = Column('created_at', DateTime, default=datetime.now(), nullable=False)
+    updated_at = Column('updated_at', DateTime, default=datetime.now(), onupdate=datetime.now(), nullable=False)
     username = Column(String(256))
     line_user_id = Column(String(256))
 

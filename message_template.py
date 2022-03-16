@@ -19,10 +19,28 @@ def confirm_input_message(username, payment_info):
 
     return confirm_input_message
 
-def cancel_input_message(cancel_user, payment_user, payment):
-    cancel_input_message = TextSendMessage(text=f'{cancel_user}さんが以下の支払情報を削除しました。\n「{payment_user}さんの{payment}円の支払い」')
+def cancel_input_message(cancel_user, payment_user, payment, payment_created_at):
+    cancel_input_message = TextSendMessage(text=f'{cancel_user}さんが以下の支払情報を削除しました。\n{payment_created_at.strftime("%m月%d日 %H:%M")}\n{payment_user}さんの{payment}円の支払い')
 
     return cancel_input_message
+
+def cancel_accounting_message(group):
+    cancel_accounting_message = TemplateSendMessage(
+        alt_text='会計中',
+        template=ButtonsTemplate(
+            title='会計の中断',
+            text='会計の最中です。\n会計を行うメンバーをメンションで選択してください。',
+            actions=[
+                PostbackAction(
+                    label='会計を中断する',
+                    display_text='会計を中断する',
+                    data=f'cancel_accounting:{group.id}'
+                ),
+            ]
+        )
+    )
+
+    return cancel_accounting_message
 
 def kaikei_confirm_message(total_payment, warikan_users):
     warikan_user_names = []
@@ -76,3 +94,4 @@ def kaikeikun_menu_message():
     )
 
     return kaikeikun_menu_message
+
