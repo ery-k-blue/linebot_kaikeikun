@@ -6,3 +6,4 @@ aiolinebot==0.4.1
 line-bot-sdk==2.1.0
 fastapi==0.74.1
 python-dotenv==0.19.2
+sqlalchemy==1.4.31
