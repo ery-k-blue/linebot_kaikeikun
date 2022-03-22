@@ -2,7 +2,7 @@ from aiolinebot import AioLineBotApi
 from fastapi import BackgroundTasks, FastAPI, Request
 from linebot import WebhookParser
 from linebot.models import TextSendMessage
-import uvicorn
+import db
 
 import setting_env
 from hundler import message_hundler, postback_hundler
@@ -98,6 +98,8 @@ async def handle_events(events):
 
                 if "send_help_message" in postback_data:
                     await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"こちらをご確認下さい。\nhttps://github.com/ery-k-blue/linebot_kaikeikun#readme"))
+
+        db.session.close()
 
 def _get_event_info(ev):
     line_user_id = getattr(ev.source, "user_id", None)
