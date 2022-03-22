@@ -2,6 +2,7 @@ from aiolinebot import AioLineBotApi
 from fastapi import BackgroundTasks, FastAPI, Request
 from linebot import WebhookParser
 from linebot.models import TextSendMessage
+import uvicorn
 
 import setting_env
 from hundler import message_hundler, postback_hundler
@@ -140,3 +141,6 @@ def _judg_through_event(event_type, text, postback_data, mentionees_line_user_in
             if text.isdigit() or text == "":
                 return True
     return False
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=setting_env.PORT)
