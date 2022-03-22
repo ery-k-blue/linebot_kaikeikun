@@ -25,8 +25,8 @@ class PaymentInfo(Base):
     payment = Column(INTEGER(unsigned=True))
     is_settled = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
-    user_id = Column(Integer, ForeignKey("user.id"))
-    group_id = Column(Integer, ForeignKey("group.id"))
+    user_id = Column(ForeignKey("user.id"))
+    group_id = Column(ForeignKey("group.id"))
 
     user = relationship("User", backref=backref('payment_info', order_by=id))
     group = relationship("Group", backref=backref('payment_info', order_by=id))
