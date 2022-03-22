@@ -4,3 +4,4 @@ python-multipart==0.0.5
 jinja2==3.0.1
 aiolinebot==0.4.1
 line-bot-sdk==2.1.0
+fastapi==0.74.1
