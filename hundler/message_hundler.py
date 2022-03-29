@@ -67,7 +67,10 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
         # -が最も大きい人を抽出: 払う人
         give_colm_index = pd.to_numeric(gm_df["payment"]).idxmin()
         giver_payment = gm_df.at[give_colm_index, "payment"]
-        
+
+        if giver_payment == 1:
+            break
+
         if giver_payment + taker_payment >= 0:
             gm_df.at[give_colm_index, "payment"] = 0
             gm_df.at[take_colm_index, "payment"] += giver_payment
