@@ -97,7 +97,7 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
         p.is_settled = True
 
     group.is_accounting = False
-    # db.session.add(group)
+    db.session.add(group)
     db.session.commit()
     db.session.close()
 
