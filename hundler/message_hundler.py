@@ -12,6 +12,7 @@ async def input_payment_info(line_api, reply_token, pay_user, group, text):
     payment_info = PaymentInfo(payment=payment, user_id=pay_user.id, group_id=group.id)
     db.session.add(payment_info)
     db.session.commit()
+    db.session.close()
 
     # レコードを作成後、確認メッセージの送信
     await line_api.reply_message_async(reply_token, confirm_input_message(pay_user.username, payment_info))
@@ -101,4 +102,5 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
     group.is_accounting = False
     db.session.add(group)
     db.session.commit()
+    db.session.close()
 
