@@ -61,9 +61,6 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
         if _count >= 999:
             break
 
-        print('gm_df["payment"]:\n\n{}'.format(gm_df["payment"]))
-        print('gm_df["payment"]:{}'.format(gm_df["payment"].dtypes))
-
         # +が最も大きい人を抽出: もらう人
         take_colm_index = pd.to_numeric(gm_df["payment"]).idxmax()
         taker_payment = gm_df.at[take_colm_index, "payment"]
