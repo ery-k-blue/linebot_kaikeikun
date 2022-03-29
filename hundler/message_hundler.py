@@ -86,7 +86,7 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
     if warikan_info == "--支払情報--\n(払う人→もらう人: 金額)\n\n" and _count == 1:
         warikan_info = "割り勘を行う必要はありません。\n"
     
-    warikan_info += "※\nこれまでの入力情報は削除されます。"
+    warikan_info += "\n※これまでの入力情報は削除されます。"
     await line_api.reply_message_async(reply_token, TextSendMessage(warikan_info))
 
     # 支払情報、グループの状態を会計中から通常に変更
