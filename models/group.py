@@ -34,6 +34,7 @@ class Group(db.Base):
             group = Group(line_group_id=line_group_id)
             db.session.add(group)
             db.session.commit()
+            db.session.close()
             print('_____create_group_____')
 
         return group

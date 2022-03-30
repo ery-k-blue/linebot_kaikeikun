@@ -12,6 +12,7 @@ async def input_payment_info(line_api, reply_token, pay_user, group, text):
     payment_info = PaymentInfo(payment=payment, user_id=pay_user.id, group_id=group.id)
     db.session.add(payment_info)
     db.session.commit()
+    db.session.close()
 
     # レコードを作成後、確認メッセージの送信
     await line_api.reply_message_async(reply_token, confirm_input_message(pay_user.username, payment_info))
@@ -61,12 +62,15 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
             break
 
         # +が最も大きい人を抽出: もらう人
-        take_colm_index = gm_df["payment"].idxmax()
+        take_colm_index = pd.to_numeric(gm_df["payment"]).idxmax()
         taker_payment = gm_df.at[take_colm_index, "payment"]
         # -が最も大きい人を抽出: 払う人
-        give_colm_index = gm_df["payment"].idxmin()
+        give_colm_index = pd.to_numeric(gm_df["payment"]).idxmin()
         giver_payment = gm_df.at[give_colm_index, "payment"]
-        
+
+        if giver_payment == 1:
+            break
+
         if giver_payment + taker_payment >= 0:
             gm_df.at[give_colm_index, "payment"] = 0
             gm_df.at[take_colm_index, "payment"] += giver_payment
@@ -83,7 +87,7 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
     if warikan_info == "--支払情報--\n(払う人→もらう人: 金額)\n\n" and _count == 1:
         warikan_info = "割り勘を行う必要はありません。\n"
     
-    warikan_info += "※\nこれまでの入力情報は削除されます。"
+    warikan_info += "\n※これまでの入力情報は削除されます。"
     await line_api.reply_message_async(reply_token, TextSendMessage(warikan_info))
 
     # 支払情報、グループの状態を会計中から通常に変更
@@ -98,4 +102,5 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
     group.is_accounting = False
     db.session.add(group)
     db.session.commit()
+    db.session.close()
 
