@@ -85,6 +85,11 @@ def kaikeikun_menu_message():
                     data=f'start_accounting:'
                 ),
                 PostbackAction(
+                    label='支払い情報の確認',
+                    display_text='支払い情報の確認会計を行う',
+                    data=f'check_payment_info:'
+                ),
+                PostbackAction(
                     label='使い方を見る',
                     display_text='使い方を見る',
                     data='send_help_message:'

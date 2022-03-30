@@ -96,6 +96,9 @@ async def handle_events(events):
                 if "start_accounting" in postback_data:
                     await postback_hundler.start_accounting(line_api, ev.reply_token, group)
 
+                if "check_payment_info" in postback_data:
+                    await postback_hundler.check_payment_info(line_api, ev.reply_token, group)                    
+
                 if "send_help_message" in postback_data:
                     await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"こちらをご確認下さい。\nhttps://github.com/ery-k-blue/linebot_kaikeikun#readme"))
 
