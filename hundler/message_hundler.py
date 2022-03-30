@@ -12,7 +12,7 @@ async def input_payment_info(line_api, reply_token, pay_user, group, text):
     payment_info = PaymentInfo(payment=payment, user_id=pay_user.id, group_id=group.id)
     db.session.add(payment_info)
     db.session.commit()
-    db.session.close()
+    # db.session.close()
 
     # レコードを作成後、確認メッセージの送信
     await line_api.reply_message_async(reply_token, confirm_input_message(pay_user.username, payment_info))
@@ -68,7 +68,7 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
         give_colm_index = pd.to_numeric(gm_df["payment"]).idxmin()
         giver_payment = gm_df.at[give_colm_index, "payment"]
 
-        if giver_payment == 1:
+        if taker_payment == 1:
             break
 
         if giver_payment + taker_payment >= 0:
@@ -102,5 +102,5 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
     group.is_accounting = False
     db.session.add(group)
     db.session.commit()
-    db.session.close()
+    # db.session.close()
 

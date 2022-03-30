@@ -41,6 +41,6 @@ class User(db.Base):
         group.user += [user]
         db.session.add(group)
         db.session.commit()
-        db.session.close()
+        # db.session.close()
         print("_____connect_group_user_____")
         return user
