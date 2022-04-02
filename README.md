@@ -25,7 +25,7 @@
 ### メニューを呼び出す
 - 会計君がグループに存在する状態で、「会計君」とメッセージを送信するとメニューが送信されます。
 
-![image](https://user-images.githubusercontent.com/54242557/158563517-df46d575-e774-4e2f-b346-ab5ddce8c60d.png)
+![iOS の画像 (5)](https://user-images.githubusercontent.com/54242557/161373829-1d67360b-41fa-40c6-acb7-6970e7771bd3.jpg)
 
 ### 支払情報を入力する
 支払情報の入力方法は「支払った本人が入力する方法」と「他の人が代理で入力する方法」の2つ存在します。
