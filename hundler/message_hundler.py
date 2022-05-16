@@ -68,7 +68,7 @@ async def selected_warikan_member(line_api, reply_token, group, speaker_line_use
         give_colm_index = pd.to_numeric(gm_df["payment"]).idxmin()
         giver_payment = gm_df.at[give_colm_index, "payment"]
 
-        if taker_payment == 1:
+        if taker_payment < len(gm_df["UserId"]):
             break
 
         if giver_payment + taker_payment >= 0:
