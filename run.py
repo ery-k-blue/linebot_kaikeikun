@@ -26,21 +26,11 @@ async def handle_request(request: Request, background_tasks: BackgroundTasks):
 
 async def handle_events(events):
     for ev in events:
-        print(ev.type)
-        print(ev)
-
         # eventの情報を取得
         text, postback_data, speaker_line_user_id, line_group_id, mentionees_line_user_info = _get_event_info(ev)  
 
-        print("text:{}".format(text))
-        print("postback_data:{}".format(postback_data))
-        print("speaker_line_user_id:{}".format(speaker_line_user_id))
-        print("line_group_id:{}".format(line_group_id))
-        print("mentionees_line_user_info:{}".format(mentionees_line_user_info))
-
         # 入力が「数字のみ」or「メンション＋数字のみ」or「会計君が含まれている」以外の場合、何もしない
         if not _judg_through_event(ev.type, text, postback_data, mentionees_line_user_info):
-            print("___pass")
             return []
 
         # --- ユーザー・グループを登録 ---
@@ -74,17 +64,13 @@ async def handle_events(events):
                 if text.isdigit():
                     if len(mentionees_line_user_info) == 0:
                         await message_hundler.input_payment_info(line_api, ev.reply_token, speaker_line_user, group, text)
-                        print("数字のみのメッセージ")
                     elif len(mentionees_line_user_info) == 1:
                         await message_hundler.input_payment_info(line_api, ev.reply_token, mentionee_line_user, group, text)
-                        print("メンション＋数字のみのメッセージ")
                     elif len(mentionees_line_user_info) >= 2:
-                        print("複数メンション＋数字のみのメッセージ")
                         await line_api.reply_message_async(ev.reply_token, TextSendMessage(text=f"金額を支払った人は1人しか選択できません。"))
 
                 if "会計君" in text:
                     await line_api.reply_message_async(ev.reply_token, kaikeikun_menu_message())
-                    print("会計君込みのメッセージ")
 
             elif ev.type == "postback":
                 if "cancel_accounting" in postback_data:
