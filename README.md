@@ -45,11 +45,11 @@
 #### 他の人が代理で入力する方法
 他の人が代理で入力する際は、「<支払った人メンション>＋支払った金額」を入力します。
 
-![image](https://user-images.githubusercontent.com/54242557/158563768-d23ccf5a-ded0-4ce2-9ba5-b6f928fd0385.png)
+![S__12009480](https://user-images.githubusercontent.com/54242557/174423639-87826b27-3359-4a08-90bb-fb65c02218b7.jpg)
 
 ### 会計を行う
 - 会計を行いたい場合は、メニューの「会計を行う」ボタンを押します。（ボタンを押すと「会計を行う」が自動で送信されます。）
 - 次に、割り勘を行うメンバーをメンションで選択します。（入力者は自動で含まれます。）
 - すると、誰が誰に何円払えばよいかの情報が送信されます。
 
-![image](https://user-images.githubusercontent.com/54242557/158563853-252b7e31-05cd-4ac3-a730-7d9986d2f469.png)
+![S__12009479](https://user-images.githubusercontent.com/54242557/174423589-853ad09c-81e1-44bb-b602-4760a4b85cfd.jpg)
